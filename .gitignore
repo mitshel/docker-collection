@@ -1,1 +1,2 @@
 ./mysql/mysqldata/*
+./docker/docker-registry/registry/*

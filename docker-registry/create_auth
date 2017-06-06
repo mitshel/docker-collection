@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker run --entrypoint htpasswd registry:2 -Bbn gtnn gtnn > auth/htpasswd
+#docker run --entrypoint htpasswd registry:2 -Bbn testuser testpassword > path/auth/htpasswd
