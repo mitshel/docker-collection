@@ -1,0 +1,60 @@
+FROM php:fpm-alpine
+MAINTAINER Dmitry Shelepnev <mitshel@mail.ru>
+
+ENV GLPI_VERSION=9.1.1
+ENV GLPI_URL=https://github.com/glpi-project/glpi/releases/download/$GLPI_VERSION/glpi-$GLPI_VERSION.tgz
+ENV LANG=ru_RU.UTF-8
+ENV TIMEZONE Europe/Moscow
+ENV PHP_MEMORY_LIMIT 1024M
+ENV MAX_UPLOAD 128M
+ENV PHP_MAX_FILE_UPLOAD 128
+ENV PHP_MAX_POST 128M
+
+RUN apk update \
+    && apk upgrade \
+    && apk add --update wget bzip2 \
+    && apk add --update tzdata \
+    && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
+    && echo "${TIMEZONE}" > /etc/timezone 
+
+# set recommended PHP.ini settings 
+# see https://secure.php.net/manual/en/opcache.installation.php 
+RUN ( \
+		echo 'opcache.memory_consumption=128'; \
+		echo 'opcache.interned_strings_buffer=8'; \
+		echo 'opcache.max_accelerated_files=4000'; \
+		echo 'opcache.revalidate_freq=2'; \
+		echo 'opcache.fast_shutdown=1'; \
+		echo 'opcache.enable_cli=1'; \
+	) > /usr/local/etc/php/conf.d/opcache-recommended.ini
+
+# Download & Install needed php extensions: ldap, imap, zlib, gd, soap 
+RUN apk --update add --no-cache php5-ldap  openldap-dev \
+    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu \
+    && docker-php-ext-install ldap \
+    && apk --update add --no-cache php5-imap libssl-dev libc-client2007e-dev libkrb5-dev \
+    && docker-php-ext-configure imap --with-imap-ssl --with-kerberos \
+    && docker-php-ext-install imap \
+    && apk --update add --no-cache libpng12-dev libjpeg-dev \
+    && docker-php-ext-configure gd --with-jpeg-dir=/usr/lib \
+    && docker-php-ext-install gd \
+    && apk --update add --no-cache zlib1g-dev \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo_mysql \
+    && apk --update add --no-cache re2c libmcrypt-dev \
+    && docker-php-ext-install mcrypt \
+    && apk --update add --no-cache php-soap libxml2-dev \
+    && docker-php-ext-install soap \
+    && apk --update add --no-cache php5-xmlrpc libxslt-dev \
+    && docker-php-ext-install xmlrpc xsl
+
+# Download & Install GLPI 
+RUN cd /var/www/html \
+    && wget ${GLPI_URL} \
+    && tar --strip-components=1 -xvf glpi-${GLPI_VERSION}.tgz
+
+# Change owner for security reasons RUN chown -R www-data:www-data /var/www/html/*
+#RUN chown www-data:www-data /var/lib/php5
+WORKDIR /var/www/html
+#CMD ["apache2-foreground"]

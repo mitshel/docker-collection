@@ -1,0 +1,52 @@
+upstream glpi {
+        ip_hash;
+        server glpi:9000;
+}
+
+server {
+        listen 80;
+        server_name  glpi.dsnet.ru;
+        server_name_in_redirect off;
+        root   /var/www/html;
+
+        index index.php index.html index.htm default.html default.htm;
+
+        #access_log  /var/log/nginx/glpi_access.log  main;
+        #error_log   /var/log/nginx/glpi_error.log;
+
+        location / {
+                try_files $uri $uri/ /index.php?$args;
+        }
+
+        # deny running scripts inside writable directories
+        location ~* /(images|cache|media|logs|tmp)/.*\.(php|pl|py|jsp|asp|sh|cgi)$ {
+                return 403;
+                error_page 403 /403_error.html;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass  glpi;
+            #fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include /etc/nginx/fastcgi.conf;
+            fastcgi_read_timeout 300;
+
+	    auth_gss on;
+	    auth_gss_realm DSNET.RU;
+	    auth_gss_keytab /etc/krb5.keytab;
+	    auth_gss_service_name HTTP/docker-app.dsnet.ru;
+#	     auth_gss_allow_basic_fallback off;
+        }
+
+        # caching of files
+        location ~* \.(ico|pdf|flv)$ {
+                expires 1y;
+        }
+
+        location ~* \.(js|css|png|jpg|jpeg|gif|swf|xml|txt)$ {
+                expires 14d;
+        }
+}
+

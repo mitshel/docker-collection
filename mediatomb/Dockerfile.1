@@ -1,0 +1,23 @@
+# Mediatomb server
+#
+# VERSION               0.0.1
+
+FROM fedora:latest
+MAINTAINER Dmitry Shelepnev "mitshel@mail.ru"
+
+#RUN echo "export LANG=ru_RU.utf-8" > /opt/export_LANG.sh
+#ENV BASH_ENV=/opt/export_LANG.sh \
+#    ENV=/opt/export_LANG.sh \
+#    PROMPT_COMMAND="source /opt/export_LANG.sh"
+
+#RUN  dnf clean all; dnf check-update; dnf install -y mediatomb
+
+ENV LANG="ru_RU.UTF-8"
+COPY i18n /etc/sysconfig/
+
+EXPOSE 50500
+EXPOSE 1900
+EXPOSE 41570
+
+CMD ["/bin/bash"]
+#CMD ["mediatomb","-p 50500"]

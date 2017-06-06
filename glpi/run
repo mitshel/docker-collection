@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --name glpi --link mysql:mysql -v /var/www/html -d mitshel/glpi

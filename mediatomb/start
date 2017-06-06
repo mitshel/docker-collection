@@ -1,0 +1,2 @@
+#!/bin/bash
+docker run --rm -v /mnt/nfs/Video /media/Video -p 50500:50500

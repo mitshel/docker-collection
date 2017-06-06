@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run -p 8002:8002 -v /usr/src/gtnn --link postgre:postgre --name gtnn -d mitshel/gtnn

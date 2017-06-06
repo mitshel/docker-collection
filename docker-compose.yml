@@ -1,0 +1,55 @@
+version: '2'
+services:
+    mysql:
+        image: mysql:latest
+        ports:
+            - '3306:3306'
+        volumes:
+            - /home/docker/mysql/mysqldata:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: dsadmin
+    postgre:
+        image: postgres:alpine
+        ports:
+            - '5432:5432'
+        volumes:
+            - /home/docker/postgre/pgdata:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: dsadmin
+
+    sopds:
+        build: sopds-p3.6
+        ports:
+            - '8000:8000'
+        volumes:
+            - /usr/src/app
+    glpi:
+        build: glpi
+        links:
+            - mysql
+        volumes:
+            - /var/www/html
+        ports:
+            - '9000:9000'
+    gtnn:
+        build: gtnn
+        links:
+            - postgre
+        volumes:
+            - /usr/src/gtnn
+        ports:
+            - '8002:8002'
+
+    nginx-sso:
+        build: nginx-sso
+        volumes_from:
+            - sopds
+            - glpi
+            - gtnn
+        links:
+            - sopds
+            - glpi
+            - gtnn
+        ports:
+            - '80:80'
+

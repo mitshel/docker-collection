@@ -1,0 +1,44 @@
+FROM centos:7
+
+ADD utils/* /usr/bin/
+ENV TERM=xterm
+ENV PYTHON_VER=3.6.0
+
+RUN mkdir -p /usr/src/app \
+    cd /tmp \
+    && yum update -y \
+    && yum install -y wget git make \
+    && yum-config-manager --add-repo https://apt-mo.trafficmanager.net/yumrepos/mssql-rhel7-release/ \
+    && yum-config-manager --enable mssql-rhel7-release \
+    && wget "http://aka.ms/msodbcrhelpublickey/dpgswdist.v1.asc" \ 
+    && rpm --import dpgswdist.v1.asc \
+    && yum remove unixodbc \
+    && yum update -y \
+    && ACCEPT_EULA=Y yum install -y msodbcsql \
+    && yum install -y unixODBC-utf16-devel 
+
+RUN yum-builddep -y python \
+    && wget https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz \
+    && tar xzvf Python-$PYTHON_VER.tgz \
+    && cd Python-$PYTHON_VER \
+    && ./configure --enable-optimizations \
+    && make \
+    && make install 
+
+RUN cd /usr/src/app \
+    && git clone http://gitlab.dsnet.ru/mitshel/arzgtnn_www_portal.git . \
+    && yum install -y libpqxx-devel.x86_64 \
+    && python3 -m pip install --no-cache-dir -r requirements.txt \
+    && python3 -m pip install gunicorn \
+    && sed -i "s/PRODUCTION = False/PRODUCTION = True/g" $DEPLOY_DIR"arzgtnn_www_portal/settings.py" \
+    && sed -i "s/ENABLE_SSO = False/ENABLE_SSO = True/g" $DEPLOY_DIR"arzgtnn_www_portal/settings.py" \
+    && echo "192.168.7.5 LPU-02-MICS" >> /etc/hosts  \
+    && python3 manage.py migrate \
+    && echo "from django.contrib.auth.models import User; User.objects.create_superuser('site_admin', 'admin@example.com', 'P@ssw0rd')" | python3 manage.py shell 
+
+WORKDIR /usr/src/app
+EXPOSE 8002
+
+#CMD ["python3", "manage.py", "runserver", "0.0.0.0:8002"]
+CMD ["gunicorn","-w","4","--env", "DJANGO_SETTINGS_MODULE=arzgtnn_www_portal.settings","wsgi.py","-b","0.0.0.0:8002"]
+#CMD ["start.sh"]

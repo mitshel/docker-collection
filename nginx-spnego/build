@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker build . -t mitshel/nginx-spnego:latest -t mitshel/nginx-spnego:1.11.9

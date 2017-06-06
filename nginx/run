@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --volumes-from sopds  --volumes-from glpi --volumes-from gtnn --link sopds:sopds --link glpi:glpi --link gtnn:gtnn --name nginx -p 80:80 -d mitshel/nginx

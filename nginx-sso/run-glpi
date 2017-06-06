@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run  --volumes-from glpi --link glpi:glpi --name nginx-sso -p 80:80 -d mitshel/nginx-sso

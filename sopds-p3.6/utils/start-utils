@@ -1,0 +1,14 @@
+stop_requested=false
+trap "stop_requested=true" TERM INT
+
+wait_signal() {
+    while ! $stop_requested; do
+        sleep 1
+    done
+}
+
+wait_exit() {
+    while pidof $1; do
+        sleep 1
+    done
+}
