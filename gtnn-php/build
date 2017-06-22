@@ -1,0 +1,5 @@
+#!/bin/bash
+
+docker build . -t mitshel/gtnn-php:latest
+docker tag mitshel/gtnn-php dockhost:5000/gtnn-php
+docker push dockhost:5000/gtnn-php
