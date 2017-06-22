@@ -1,0 +1,31 @@
+upstream gtnn {
+	ip_hash;
+	server gtnn:8002;
+}
+
+server {
+        listen 80;
+        server_name gtnn-app.dsnet.ru;
+
+        access_log  /var/log/nginx/gtnn_access.log;
+        error_log   /var/log/nginx/gtnn_error.log;
+
+        location /static/ {
+                 alias /usr/src/gtnn/static/;
+                 expires 30d;
+        }
+
+        location / {
+                proxy_pass       http://gtnn/;
+                proxy_set_header Host $server_name;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Remote-User $remote_user;
+
+	        auth_gss on;
+            	auth_gss_realm DSNET.RU;
+            	auth_gss_keytab /etc/gtnn-app.keytab;
+            	auth_gss_service_name HTTP/gtnn-app.dsnet.ru;
+        }
+}
+

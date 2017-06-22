@@ -63,6 +63,8 @@ RUN cd /var/www/html \
     && tar --strip-components=1 -xvf glpi-${GLPI_VERSION}.tgz \
     && chown -R  www-data:www-data /var/www/html
 
+COPY config_db.php /var/www/html/config/
+
 WORKDIR /var/www/html
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["php-fpm","-e"]
