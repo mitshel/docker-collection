@@ -1,2 +1,4 @@
 /mysql/mysqldata/*
+/postgre/pgdata/*
 /docker-registry/registry/*
+
