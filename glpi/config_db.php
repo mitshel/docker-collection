@@ -3,9 +3,9 @@
 
  public $dbhost     = 'mysql';
 
- public $dbuser     = 'root';
+ public $dbuser     = 'glpi';
 
- public $dbpassword = 'root';
+ public $dbpassword = 'glpi';
 
  public $dbdefault  = 'glpi';
 

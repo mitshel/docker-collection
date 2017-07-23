@@ -1,6 +1,8 @@
 FROM php:fpm
 MAINTAINER Dmitry Shelepnev <mitshel@mail.ru>
 
+ENV GLPI_VERSION=9.1.2
+ENV GLPI_URL=https://github.com/glpi-project/glpi/releases/download/$GLPI_VERSION/glpi-$GLPI_VERSION.tgz
 ENV TERM=xterm
 ENV TIMEZONE Europe/Moscow
 ENV PHP_MEMORY_LIMIT 1024M
@@ -55,12 +57,13 @@ RUN apt-get install -y php5-ldap libldap2-dev \
     && apt-get -y install php5-xmlrpc libxslt-dev \
     && docker-php-ext-install xmlrpc xsl
 
-# Download and Install Composer
-COPY composer/* /tmp
-RUN php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" \
-    && php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-    && cd /tmp \
-    && composer install --no-dev 
+# Download & Install GLPI 
+RUN cd /var/www/html \
+    && wget ${GLPI_URL} \
+    && tar --strip-components=1 -xvf glpi-${GLPI_VERSION}.tgz \
+    && chown -R  www-data:www-data /var/www/html
+
+COPY config_db.php /var/www/html/config/
 
 WORKDIR /var/www/html
 EXPOSE 9000

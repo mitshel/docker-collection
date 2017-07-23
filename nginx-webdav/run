@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run -v /mnt/nfs/WEBDAV:/mnt/nfs/WEBDAV --name nginx-webdav -p 80:80 -d mitshel/nginx-webdav

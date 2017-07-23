@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --name gtnn-php -v /var/www/html -d mitshel/gtnn-php

@@ -1,3 +1,6 @@
 #!/bin/bash
 
 docker build . -t mitshel/nginx-sso:latest
+docker tag mitshel/nginx-sso dockhost:5000/nginx-sso
+docker push dockhost:5000/nginx-sso
+

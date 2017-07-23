@@ -1,8 +1,8 @@
-FROM alpine:3.4
+FROM alpine:3.6
 
 MAINTAINER Dmitry Shelepnev "mitshel@mail.ru"
 
-ENV NGINX_VERSION 1.11.9
+ENV NGINX_VERSION 1.12.1
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
@@ -51,6 +51,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-file-aio \
 		--with-http_v2_module \
                 --add-module=spnego-http-auth-nginx-module \
+                --add-module=nginx-dav-ext-module \
 	" \
 	&& addgroup -S nginx \
 	&& adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
@@ -61,6 +62,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		openssl-dev \
 		pcre-dev \
 		zlib-dev \
+                expat-dev \
+                # httpd-tools \
 		linux-headers \
 		curl \
 		gnupg \
@@ -81,6 +84,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& rm nginx.tar.gz \
 	&& cd /usr/src/nginx-$NGINX_VERSION \
         && git clone https://github.com/stnoonan/spnego-http-auth-nginx-module.git spnego-http-auth-nginx-module \
+        && git clone https://github.com/arut/nginx-dav-ext-module.git nginx-dav-ext-module \
 	&& ./configure $CONFIG --with-debug \
 	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \

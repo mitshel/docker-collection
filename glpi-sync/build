@@ -1,3 +1,5 @@
 #!/bin/bash
 
-docker build . -t mitshel/glpi-sync:latest
+docker build . --no-cache -t mitshel/glpi-sync:latest
+docker tag mitshel/glpi-sync dockhost:5000/glpi-sync
+docker push dockhost:5000/glpi-sync
