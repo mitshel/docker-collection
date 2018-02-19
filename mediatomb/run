@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#docker run --name mediatomb -p 41570:41570 -p 1900:1900/udp -p 49152:49152 -d mitshel/mediatomb
+docker run --name mediatomb --net=host -d mitshel/mediatomb
+#50500/tcp 49152/tcp 1900/udp

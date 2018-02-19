@@ -1,0 +1,21 @@
+# Mediatomb server
+#
+# VERSION               0.0.1
+
+FROM ubuntu:latest 
+MAINTAINER Dmitry Shelepnev "mitshel@mail.ru"
+
+RUN apt update \
+ && apt  -y install mediatomb-daemon
+
+ADD config.xml /etc/mediatomb/config.xml
+ADD rtspcode.sh /usr/local/bin
+
+VOLUME ["/var/log/mediatomb"]
+VOLUME ["/var/lib/mediatomb"]
+VOLUME ["/media"]
+
+#EXPOSE 50500/tcp 49152/tcp 1900/udp 
+#EXPOSE 41570/tcp
+#ENTRYPOINT /usr/bin/mediatomb
+CMD ["/usr/bin/mediatomb","-c","/etc/mediatomb/config.xml","-D"]

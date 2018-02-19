@@ -1,0 +1,30 @@
+service rsh-spx
+{
+        flags           = REUSE
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/sbin/in.rshd
+        disable         = no
+}
+
+service fln-spx
+{
+        flags           = REUSE
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/sbin/in.rlogind
+        disable         = no
+}
+
+service shell
+{
+        flags           = REUSE
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/sbin/in.rexecd
+        disable         = no
+}
+

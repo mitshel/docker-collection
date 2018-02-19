@@ -1,5 +1,5 @@
 #!/bin/bash
 
-docker build . -t mitshel/mysql:latest
+docker build . -t mitshel/mysql:oct17
 docker tag mitshel/mysql dockhost:5000/mysql
 docker push dockhost:5000/mysql

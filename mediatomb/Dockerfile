@@ -1,18 +1,36 @@
-# Mediatomb server
-#
-# VERSION               0.0.1
+FROM debian:wheezy 
+MAINTAINER Mitshel <mitshel@mail.ru> 
 
-FROM fedora:latest
-MAINTAINER Dmitry Shelepnev "mitshel@mail.ru"
+# Build-time metadata as defined at http://label-schema.org 
+ARG BUILD_DATE 
+ARG VCS_REF 
+ARG VERSION 
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="MediaTomb" \
+      org.label-schema.description="Mediatomb UPnP server" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/kahatie/docker" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"
 
-RUN dnf install -y mediatomb
+# Mise a jour / installation des packet 
+ENV DEBIAN_FRONTEND noninteractive 
+RUN apt-get update && apt-get install -y\
+ mediatomb-daemon\
+ && apt-get clean\
+ && rm -rf /var/lib/apt/lists/*
 
-ENV LANG="ru_RU.UTF-8"
-COPY i18n /etc/sysconfig/
+ADD config.xml /etc/mediatomb/config.xml 
+ADD rtspcode.sh /usr/local/bin/rtspcode.sh
 
-EXPOSE 50500
-EXPOSE 1900
-EXPOSE 41570
+RUN chown -R mediatomb:mediatomb /etc/mediatomb
 
-CMD ["/bin/bash"]
-#CMD ["mediatomb","-p 50500"]
+USER mediatomb 
+
+# Map port 
+#EXPOSE 50500/tcp 
+#EXPOSE 50500/udp 
+#EXPOSE 1900/udp 
+#EXPOSE 41570/tcp 
+
+ENTRYPOINT /usr/bin/mediatomb -c /etc/mediatomb/config.xml -p 50500
