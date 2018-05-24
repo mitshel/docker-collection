@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Commands for MYSQL with mediatomb database 
+# create user 'mt'@'%' identified by 'mt';
+# grant select on mediatomb.* to 'mt'@'%';
+
+cmd=$1
+catalog=$2
+mediatomb_ip=192.168.7.106
+mtombdb="mysql -h $mediatomb_ip mediatomb -umt -pmt"
+
+# Удаляем последний слэш в каталоге если он есть
+if [ "${catalog:(-1):1}" = "/" ];
+then
+  catalog=${catalog:0:(-1)}
+fi
+
+if [ "$cmd" = "add" ];
+then
+   echo "Try add $catalog in mediatomb"
+
+   # Получаем object_id (переводим путь в 16-ричную строку)
+   oid=""
+   for ((i=0;$i<${#catalog};i=$(($i+1))))
+   do
+     sym=`printf '%0.2x' "'${catalog:$i:1}"`
+     oid=$oid$sym
+   done
+
+   # Получаем SID (Session ID)
+   sid=`curl -s "http://$mediatomb_ip:50500/content/interface?req_type=auth&return_type=xml&sid=null&action=get_sid" | grep sid | awk '{print $3}' | sed -e 's/\"//g'`
+
+   # Добавляем файл или папку
+   if [ -a "$catalog" ];
+   then
+     curl -s -o /dev/null "http://$mediatomb_ip:50500/content/interface?req_type=autoscan&return_type=xml&$sid&action=as_edit_save&object_id=$oid&from_fs=1&scan_mode=inotify&scan_level=full&recursive=true&hidden=true&cancel=Cancel"
+   else
+     echo "Nothing to add..."
+   fi
+fi
+
+if [ "$cmd" = "del" ];
+then
+   echo "Try delete $catalog from mediatomb"
+
+   # Получаем SID (Session ID)
+   sid=`curl -s "http://$mediatomb_ip:50500/content/interface?req_type=auth&return_type=xml&sid=null&action=get_sid" | grep sid | awk '{print $3}' | sed -e 's/\"//g'`
+
+   # Получаем идентификатор папки которую нужно удалить (object_id)
+   oid=`echo "select id from mt_cds_object where location=\"D$catalog\"" | $mtombdb | grep -v id`
+
+   # Удаляем файл или папку
+   if [ -n "$oid" ];
+   then
+     curl -s -o /dev/null "http://$mediatomb_ip:50500/content/interface?req_type=remove&return_type=xml&$sid&object_id=$oid&all=0&updates=check"
+   else
+     echo "Nothing to delete..."
+   fi
+fi
