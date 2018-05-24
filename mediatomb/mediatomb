@@ -1,0 +1,29 @@
+# Defaults for MediaTomb initscript
+# sourced by /etc/init.d/mediatomb
+# installed at /etc/default/mediatomb by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Set whether the daemon should be started. Set this value to anything
+# but 'yes' to enable the daemon
+NO_START="no"
+
+# Additional options that are passed to the daemon.
+OPTIONS=""
+
+# The network interface for MediaTomb to bind to and for which the multicast
+# routing entry should be added; "" if the route shouldn't be added at all.
+# For example: INTERFACE="eth0"
+INTERFACE="ens160"
+
+# The route command and arguments to be used if INTERFACE is defined.
+# These variables should normally be left unmodified.
+ROUTE_ADD="/sbin/route add -net 239.0.0.0 netmask 255.0.0.0"
+ROUTE_DEL="/sbin/route del -net 239.0.0.0 netmask 255.0.0.0"
+
+# The user and group that MediaTomb should be run as.
+USER="mediatomb"
+GROUP="mediatomb"
+
